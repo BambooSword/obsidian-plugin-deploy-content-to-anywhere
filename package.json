@@ -35,6 +35,7 @@
     "@octokit/core": "^3.5.1",
     "@rollup/plugin-json": "^4.1.0",
     "dayjs": "^1.10.7",
+    "js-base64": "^3.7.2",
     "tr46": "^3.0.0"
   }
 }

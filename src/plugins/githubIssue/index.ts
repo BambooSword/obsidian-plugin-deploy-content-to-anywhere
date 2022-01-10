@@ -2,6 +2,7 @@ import { Editor, MarkdownView, Notice } from "obsidian";
 import { MyPlugin } from "../../MyPlugin";
 import { SettingTab } from "./SettingTab";
 import { submitDaily } from "./submitDaily";
+import { submitReadme } from './submitReadme'
 
 // TODO
 // 1. 定义默认的值
@@ -27,6 +28,29 @@ export function githubIssue(main: MyPlugin) {
 
         new Notice("提交成功");
         console.log("提交成功");
+      } catch (error: any) {
+        new Notice(`提交失败: ${error.message}}`);
+        console.log("提交失败", error);
+      }
+    },
+  });
+  main.addCommand({
+    id: "obsidian-plugin-deploy-content-to-anywhere:command:deploy-readme",
+    name: "Deploy To Github README",
+    editorCallback: async (editor: Editor, view: MarkdownView) => {
+      console.log(view.data);
+      console.log(main.settings);
+
+      try {
+        await submitReadme({
+          content: view.data,
+          githubToken: main.settings.githubIssue.token,
+          owner: main.settings.githubIssue.owner,
+          repo: main.settings.githubIssue.repo,
+        })
+
+        new Notice("提交成功~");
+        console.log("提交成功~");
       } catch (error: any) {
         new Notice(`提交失败: ${error.message}}`);
         console.log("提交失败", error);

@@ -5513,9 +5513,9 @@ var dayjs_min = {exports: {}};
 
 var dayjs = dayjs_min.exports;
 
-let OWNER$1 = "";
-let REPO$1 = "";
-const context = {
+let OWNER$2 = "";
+let REPO$2 = "";
+const context$1 = {
     issueNumber: 0,
     userInfo: {
         id: 0,
@@ -5524,19 +5524,19 @@ const context = {
 };
 function submitDaily({ content, githubToken, owner, repo, }) {
     return __awaiter(this, void 0, void 0, function* () {
-        OWNER$1 = owner;
-        REPO$1 = repo;
+        OWNER$2 = owner;
+        REPO$2 = repo;
         const octokit = new Octokit({ auth: githubToken });
         function initContext() {
             return __awaiter(this, void 0, void 0, function* () {
                 const issueInfo = yield getCurrentIssueInfo(currentIssueName());
                 if (issueInfo) {
-                    context.issueNumber = issueInfo.number;
+                    context$1.issueNumber = issueInfo.number;
                 }
-                context.userInfo = yield selfUserInfo();
+                context$1.userInfo = yield selfUserInfo();
                 const commentList = yield getCommentList();
                 if (commentList) {
-                    context.commentList = commentList;
+                    context$1.commentList = commentList;
                 }
             });
         }
@@ -5549,8 +5549,8 @@ function submitDaily({ content, githubToken, owner, repo, }) {
         function getCurrentIssueInfo(issueName) {
             return __awaiter(this, void 0, void 0, function* () {
                 const { data } = yield octokit.request("GET /repos/{owner}/{repo}/issues", {
-                    owner: OWNER$1,
-                    repo: REPO$1,
+                    owner: OWNER$2,
+                    repo: REPO$2,
                 });
                 return data.find((info) => {
                     return info.title === issueName;
@@ -5569,6 +5569,113 @@ function submitDaily({ content, githubToken, owner, repo, }) {
                     addDailyContent(content);
                 }
                 else {
+                    console.log(context$1);
+                    updateDailyContent(content);
+                }
+            });
+        }
+        function isCommented() {
+            return context$1.commentList.some(({ user }) => user.id === context$1.userInfo.id);
+        }
+        function addDailyContent(content) {
+            octokit.request("POST /repos/{owner}/{repo}/issues/{issue_number}/comments", {
+                owner: OWNER$2,
+                repo: REPO$2,
+                issue_number: context$1.issueNumber,
+                body: content,
+            });
+        }
+        function getCommentId() {
+            const comment = context$1.commentList.find(({ user }) => user.id === context$1.userInfo.id);
+            if (comment) {
+                return comment.id;
+            }
+        }
+        function updateDailyContent(content) {
+            return __awaiter(this, void 0, void 0, function* () {
+                const commentId = getCommentId();
+                if (commentId) {
+                    octokit.request("PATCH /repos/{owner}/{repo}/issues/comments/{comment_id}", {
+                        owner: OWNER$2,
+                        repo: REPO$2,
+                        comment_id: commentId,
+                        body: content,
+                    });
+                }
+            });
+        }
+        function getCommentList() {
+            return __awaiter(this, void 0, void 0, function* () {
+                const { data } = yield octokit.request("GET /repos/{owner}/{repo}/issues/{issue_number}/comments", {
+                    owner: OWNER$2,
+                    repo: REPO$2,
+                    issue_number: context$1.issueNumber,
+                });
+                return data;
+            });
+        }
+        yield initContext();
+        sendDailyContent(content);
+    });
+}
+
+let OWNER$1 = '';
+let REPO$1 = '';
+const context = {
+    issueNumber: 0,
+    userInfo: {
+        id: 0,
+    },
+    commentList: [],
+};
+function submitDailyToUncleRan({ content, githubToken, owner, repo, }) {
+    return __awaiter(this, void 0, void 0, function* () {
+        OWNER$1 = 'su37josephxia';
+        REPO$1 = 'Daydayup';
+        const octokit = new Octokit({ auth: githubToken });
+        function initContext() {
+            return __awaiter(this, void 0, void 0, function* () {
+                const issueInfo = yield getCurrentIssueInfo(currentIssueName());
+                if (issueInfo) {
+                    context.issueNumber = issueInfo.number;
+                }
+                context.userInfo = yield selfUserInfo();
+                const commentList = yield getCommentList();
+                if (commentList) {
+                    context.commentList = commentList;
+                }
+            });
+        }
+        function currentIssueName() {
+            function getDate() {
+                return dayjs().format('YYYY_M_DD_');
+            }
+            return `${getDate()}早间播报第`;
+        }
+        function getCurrentIssueInfo(issueName) {
+            return __awaiter(this, void 0, void 0, function* () {
+                const { data } = yield octokit.request('GET /repos/{owner}/{repo}/issues', {
+                    owner: OWNER$1,
+                    repo: REPO$1,
+                });
+                console.log(data, issueName, ' in getCurrentIssueInfo');
+                return data.find(info => {
+                    return info.title.includes(issueName);
+                });
+            });
+        }
+        function selfUserInfo() {
+            return __awaiter(this, void 0, void 0, function* () {
+                const { data } = yield octokit.request('/user');
+                return data;
+            });
+        }
+        function sendDailyContent(content) {
+            return __awaiter(this, void 0, void 0, function* () {
+                if (!isCommented()) {
+                    addDailyContent(content);
+                }
+                else {
                     console.log(context);
                     updateDailyContent(content);
                 }
@@ -5578,7 +5685,7 @@ function submitDaily({ content, githubToken, owner, repo, }) {
             return context.commentList.some(({ user }) => user.id === context.userInfo.id);
         }
         function addDailyContent(content) {
-            octokit.request("POST /repos/{owner}/{repo}/issues/{issue_number}/comments", {
+            octokit.request('POST /repos/{owner}/{repo}/issues/{issue_number}/comments', {
                 owner: OWNER$1,
                 repo: REPO$1,
                 issue_number: context.issueNumber,
@@ -5595,7 +5702,7 @@ function submitDaily({ content, githubToken, owner, repo, }) {
             return __awaiter(this, void 0, void 0, function* () {
                 const commentId = getCommentId();
                 if (commentId) {
-                    octokit.request("PATCH /repos/{owner}/{repo}/issues/comments/{comment_id}", {
+                    octokit.request('PATCH /repos/{owner}/{repo}/issues/comments/{comment_id}', {
                         owner: OWNER$1,
                         repo: REPO$1,
                         comment_id: commentId,
@@ -5606,7 +5713,7 @@ function submitDaily({ content, githubToken, owner, repo, }) {
         }
         function getCommentList() {
             return __awaiter(this, void 0, void 0, function* () {
-                const { data } = yield octokit.request("GET /repos/{owner}/{repo}/issues/{issue_number}/comments", {
+                const { data } = yield octokit.request('GET /repos/{owner}/{repo}/issues/{issue_number}/comments', {
                     owner: OWNER$1,
                     repo: REPO$1,
                     issue_number: context.issueNumber,
@@ -5957,6 +6064,28 @@ function githubIssue(main) {
             console.log(main.settings);
             try {
                 yield submitDaily({
+                    content: view.data,
+                    githubToken: main.settings.githubIssue.token,
+                    owner: main.settings.githubIssue.owner,
+                    repo: main.settings.githubIssue.repo,
+                });
+                new obsidian.Notice("提交成功");
+                console.log("提交成功");
+            }
+            catch (error) {
+                new obsidian.Notice(`提交失败: ${error.message}}`);
+                console.log("提交失败", error);
+            }
+        }),
+    });
+    main.addCommand({
+        id: "obsidian-plugin-deploy-content-to-anywhere:command:deploy-uncle-ran",
+        name: "Deploy To UncleRan's DayDayUp Issue plan",
+        editorCallback: (editor, view) => __awaiter(this, void 0, void 0, function* () {
+            console.log(view.data);
+            console.log(main.settings);
+            try {
+                yield submitDailyToUncleRan({
                     content: view.data,
                     githubToken: main.settings.githubIssue.token,
                     owner: main.settings.githubIssue.owner,
